@@ -52,11 +52,11 @@ struct Token {
 	int line;
 	int position;
 
-	Token(type_t type, std::string content, int line, int position);
+	Token(type_t type, const char *content, int content_length, int line,
+			int position);
 	~Token() = default;
 
 	static type_t get_type_for(char c);
-	static type_t get_type_for(const std::string &str);
 
 	static const char *get_string(type_t type);
 };
@@ -103,7 +103,10 @@ private:
 
 	bool is_escape;
 
-	std::string buffer;
+	const char *token_begin;
+	int token_position;
+	int token_line;
+	int token_length;
 
 	std::vector<Token> tokens;
 
@@ -114,6 +117,11 @@ public:
 	std::vector<Token> tokenize();
 
 private:
+	void begin_token(bool next = false);
+	void continue_token();
+	void finish_token(Token::type_t type);
+	void add_token(Token::type_t type);
+
 	bool is_single_operator(char c);
 	bool can_be_dual_operator(char c);
 	bool is_separator(char c);
