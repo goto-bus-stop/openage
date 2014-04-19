@@ -56,6 +56,8 @@ add_executable(${PROJECT_NAME}
 	engine/util/unicode.cpp
 	engine/console/buf.cpp
 
+	nyan/tokenizer.cpp
+
 	openage/callbacks.cpp
 	openage/gamestate.cpp
 	openage/init.cpp
@@ -63,6 +65,7 @@ add_executable(${PROJECT_NAME}
 
 	testing/testing.cpp
 	testing/term.cpp
+	testing/tokenizer.cpp
 	testing/register.cpp
 )
 
