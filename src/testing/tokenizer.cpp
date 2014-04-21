@@ -62,10 +62,11 @@ bool tests::tokenizer0(int /*unused*/, char ** /*unused*/) {
 
 		NyanSpecParser parser{std::move(tokens)};
 		start = std::chrono::steady_clock::now();
-		auto spec = parser.parse();
+		auto spec_ast = parser.parse();
 		end = std::chrono::steady_clock::now();
 		duration = std::chrono::duration_cast<std::chrono::milliseconds>(
 				end - start);
+		std::cout << "\n" << spec_ast->to_string() << "\n" << std::endl;
 		log::msg("parsing spec took %lu ms", duration.count());
 	} catch (ParserError &e) {
 		auto lin = e.get_line();

@@ -27,6 +27,8 @@ private:
 	void parse_spec();
 	void parse_type_decl();
 	void parse_type_body();
+	bool parse_type_attributes();
+	void parse_type_deltas();
 
 	void throw_expected(char exp);
 	void throw_expected(const std::string &exp);
