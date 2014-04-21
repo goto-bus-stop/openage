@@ -56,7 +56,14 @@ add_executable(${PROJECT_NAME}
 	engine/util/unicode.cpp
 	engine/console/buf.cpp
 
+	nyan/parser.cpp
+	nyan/parser_error.cpp
+	nyan/nyan_spec.cpp
+	nyan/nyan_spec_ast.cpp
+	nyan/nyan_spec_parser.cpp
+	nyan/token.cpp
 	nyan/tokenizer.cpp
+	nyan/util.cpp
 
 	openage/callbacks.cpp
 	openage/gamestate.cpp
