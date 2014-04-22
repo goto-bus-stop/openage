@@ -5,8 +5,8 @@ namespace nyan {
 ASTNyanAttribute::ASTNyanAttribute(Token name, Token type, bool is_set=false)
 		:
 		name{std::move(name)},
-		type{std::move(type)},
-		is_set{is_set} {
+		is_set{is_set},
+		type{std::move(type)} {
 }
 
 std::string ASTNyanAttribute::to_string() const {

@@ -6,7 +6,9 @@
 #include <sstream>
 #include <string>
 
+#include "../nyan/nyan.h"
 #include "../nyan/tokenizer.h"
+#include "../nyan/nyan_spec_analyzer.h"
 #include "../nyan/nyan_spec_parser.h"
 #include "../engine/log.h"
 #include "../engine/util/file.h"
@@ -46,8 +48,19 @@ bool tests::tokenizer0(int /*unused*/, char ** /*unused*/) {
 	}
 	std::string input = buffer.str();
 
-	Tokenizer tokenizer{input};
 	try {
+		/*
+		auto start = std::chrono::steady_clock::now();
+		auto spec = parse_spec(input);
+		auto end = std::chrono::steady_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+				end - start);
+		std::cout << "\n" << spec->to_string() << std::endl;
+		std::cout << "Parsing nyan spec took " << duration.count() << " ms" <<
+				std::endl;
+		*/
+	//	/*
+		Tokenizer tokenizer{input};
 		auto start = std::chrono::steady_clock::now();
 		auto tokens = tokenizer.tokenize();
 		auto end = std::chrono::steady_clock::now();
@@ -66,8 +79,18 @@ bool tests::tokenizer0(int /*unused*/, char ** /*unused*/) {
 		end = std::chrono::steady_clock::now();
 		duration = std::chrono::duration_cast<std::chrono::milliseconds>(
 				end - start);
-		std::cout << "\n" << spec_ast->to_string() << "\n" << std::endl;
+		std::cout << "\n" << spec_ast->to_string() << std::endl;
 		log::msg("parsing spec took %lu ms", duration.count());
+
+		NyanSpecAnalyzer analyzer{std::move(spec_ast)};
+		start = std::chrono::steady_clock::now();
+		auto spec = analyzer.analyze();
+		end = std::chrono::steady_clock::now();
+		duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+				end - start);
+		std::cout << "\n" << spec->to_string() << std::endl;
+		log::msg("analyzing spec took %lu ms", duration.count());
+	//	*/
 	} catch (ParserError &e) {
 		auto lin = e.get_line();
 		auto pos = e.get_position();

@@ -58,9 +58,12 @@ add_executable(${PROJECT_NAME}
 
 	nyan/parser.cpp
 	nyan/parser_error.cpp
+	nyan/nyan.cpp
 	nyan/nyan_spec.cpp
+	nyan/nyan_spec_analyzer.cpp
 	nyan/nyan_spec_ast.cpp
 	nyan/nyan_spec_parser.cpp
+	nyan/nyan_types.cpp
 	nyan/token.cpp
 	nyan/tokenizer.cpp
 	nyan/util.cpp

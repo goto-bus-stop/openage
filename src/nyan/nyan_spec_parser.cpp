@@ -6,8 +6,8 @@
 
 namespace nyan {
 
-std::vector<std::string> NyanSpecParser::KEYWORDS = {
-		"bool", "int", "float", "string", "set"
+std::vector<std::string> NyanSpecParser::BASIC_TYPES = {
+		"bool", "int", "float", "string"
 	};
 
 NyanSpecParser::NyanSpecParser(std::vector<Token> tokens)
@@ -19,6 +19,14 @@ std::unique_ptr<ASTNyanSpec> NyanSpecParser::parse() {
 	ast.reset(new ASTNyanSpec);
 	parse_spec();
 	return std::move(ast);
+}
+
+bool NyanSpecParser::is_basic_type() {
+	if (token->type == Token::type_t::IDENTIFIER) {
+		return std::find(std::begin(BASIC_TYPES), std::end(BASIC_TYPES),
+				token->content) != std::end(BASIC_TYPES);
+	}
+	return false;
 }
 
 void NyanSpecParser::parse_spec() {
@@ -34,6 +42,10 @@ void NyanSpecParser::parse_spec() {
 }
 
 void NyanSpecParser::parse_type_decl() {
+	if (is_basic_type()) {
+		throw ParserError{"Invalid type identifier: '" + token->content + "'",
+				*token};
+	}
 	// insert new type node into the AST
 	ast->types.emplace_back(std::move(*token));
 	next_token();
@@ -59,11 +71,17 @@ void NyanSpecParser::parse_type_body() {
 	}
 
 	// parse '...' to determine whether dynamic attributes are allowed
-	ast->types.back().allow_dynamic_attributes =
-			accept_token(Token::type_t::TRIPLE_DOT);
+	bool dynamic_attributes = accept_token(Token::type_t::TRIPLE_DOT);
+	ast->types.back().allow_dynamic_attributes = dynamic_attributes;
 
-	// parse all type deltas
-	parse_type_deltas();	
+	if (dynamic_attributes) {
+		if (accept_token(Token::type_t::COMMA)) {
+			parse_type_deltas(true);
+		}
+	} else {
+		// parse all type deltas
+		parse_type_deltas(false);	
+	}
 }
 
 bool NyanSpecParser::parse_type_attributes() {
@@ -114,9 +132,13 @@ bool NyanSpecParser::parse_type_attributes() {
 	return got_comma;
 }
 
-void NyanSpecParser::parse_type_deltas() {
+void NyanSpecParser::parse_type_deltas(bool must) {
 	if (!has_token(Token::type_t::CIRCUM)) {
-		return;
+		if (must) {
+			throw_expected("delta type");
+		} else {
+			return;
+		}
 	}
 	while (true) {
 		if (!accept_token(Token::type_t::CIRCUM)) {
