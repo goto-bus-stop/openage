@@ -40,7 +40,7 @@ struct Token {
 		// misc
 		COLON,			// :
 		COMMA,			// ,
-		NEWLINE,		// \n
+		FAIL,			// failed to parse token, unexpected char or eof
 		END				// signals the end of token list
 	};
 

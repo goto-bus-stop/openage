@@ -43,8 +43,6 @@ Token::type_t Token::get_type_for(char c) {
 		return type_t::COLON;
 	case ',':
 		return type_t::COMMA;
-	case '\n':
-		return type_t::NEWLINE;
 	default:
 		throw ParserError{std::string{"Unexpected character: '"} + c + "'"};
 	}
@@ -102,8 +100,8 @@ const char *Token::get_string(Token::type_t type) {
 		return "COLOR";
 	case type_t::COMMA:
 		return "COMMA";
-	case type_t::NEWLINE:
-		return "NEWLINE";
+	case type_t::FAIL:
+		return "FAIL";
 	case type_t::END:
 		return "END";
 	default:

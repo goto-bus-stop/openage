@@ -11,7 +11,11 @@ namespace nyan {
 
 class Tokenizer {
 private:
+	/**
+	 * The tokenizer's internal state.
+	 */
 	enum class state_t {
+		// the next token can be of any type
 		START,
 		COMMENT,
 		DOT,
@@ -54,7 +58,7 @@ public:
 private:
 	void begin_token(bool next = false);
 	void continue_token();
-	void finish_token(Token::type_t type);
+	void finish_token(Token::type_t type, bool add_current = true);
 	void add_token(Token::type_t type);
 
 	bool is_single_operator(char c);
@@ -66,8 +70,8 @@ private:
 	void process(char c);
 	void step_back();
 
-	void throw_unexpected_char(char c);
-	void throw_unexpected_eof();
+	void unexpected_char();
+	void unexpected_eof();
 
 };
 

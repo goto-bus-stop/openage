@@ -34,6 +34,7 @@ private:
 
 	void throw_expected(char exp);
 	void throw_expected(const std::string &exp);
+	void throw_got(const std::string &exp);
 };
 
 }

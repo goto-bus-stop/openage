@@ -1,5 +1,6 @@
 #include "util.h"
 
+#include <algorithm>
 #include <sstream>
 
 namespace nyan {
@@ -46,5 +47,9 @@ std::string replace_controls(const std::string &s) {
 	return result;
 }
 
+bool is_basic_type_name(const std::string &name) {
+	auto iter = std::find(std::begin(BASIC_TYPES), std::end(BASIC_TYPES), name);
+	return iter != std::end(BASIC_TYPES);
+}
 
 }

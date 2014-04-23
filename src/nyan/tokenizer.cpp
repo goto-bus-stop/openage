@@ -37,9 +37,10 @@ std::vector<Token> Tokenizer::tokenize() {
 	}
 	process(0);
 	if (state != state_t::FINISH) {
-		throw_unexpected_eof();
+		unexpected_eof();
+	} else {
+		tokens.emplace_back(Token::type_t::END, "", 0, line, position);
 	}
-	tokens.emplace_back(Token::type_t::END, "", 0, line, position);
 	return std::move(tokens);
 }
 
@@ -55,9 +56,13 @@ void Tokenizer::continue_token() {
 	token_length++;
 }
 
-void Tokenizer::finish_token(Token::type_t type) {
+void Tokenizer::finish_token(Token::type_t type, bool add_current) {
+	if (add_current) {
+		token_length++;
+	}
 	tokens.emplace_back(type, token_begin, token_length, line,
 			token_position);
+	token_begin = current + (add_current ? 1 : 0);
 }
 
 void Tokenizer::add_token(Token::type_t type) {
@@ -129,7 +134,7 @@ void Tokenizer::process(char c) {
 		} else if (c == 0) {
 			state = state_t::FINISH;
 		} else {
-			throw_unexpected_char(c);
+			unexpected_char();
 		}
 		break;
 	case state_t::COMMENT:
@@ -147,25 +152,23 @@ void Tokenizer::process(char c) {
 			continue_token();
 			state = state_t::FLOAT;
 		} else if (c == 0) {
-			throw_unexpected_eof();	
+			unexpected_eof();	
 		} else {
-			throw_unexpected_char(c);
+			unexpected_char();
 		}
 		break;
 	case state_t::DOT2:
 		if (c == '.') {
-			continue_token();
 			finish_token(Token::type_t::TRIPLE_DOT);
 			state = state_t::START;
 		} else if (c == 0) {
-			throw_unexpected_eof();	
+			unexpected_eof();	
 		} else {
-			throw_unexpected_char(c);
+			unexpected_char();
 		}
 		break;
 	case state_t::PLUS:
 		if (c == '=') {
-			continue_token();
 			finish_token(Token::type_t::ADD);
 			state = state_t::START;
 		} else if (c == '.') {
@@ -178,13 +181,12 @@ void Tokenizer::process(char c) {
 			continue_token();
 			state = state_t::INTEGER;
 		} else {
-			finish_token(Token::type_t::PLUS);
+			finish_token(Token::type_t::PLUS, false);
 			step_back();
 		}
 		break;
 	case state_t::MINUS:
 		if (c == '=') {
-			continue_token();
 			finish_token(Token::type_t::SUB);
 			state = state_t::START;
 		} else if (c == '.') {
@@ -197,13 +199,12 @@ void Tokenizer::process(char c) {
 			continue_token();
 			state = state_t::INTEGER;
 		} else {
-			finish_token(Token::type_t::MINUS);
+			finish_token(Token::type_t::MINUS, false);
 			step_back();
 		}
 		break;
 	case state_t::DUAL_OPERATOR:
 		if (c == '=') {
-			continue_token();
 			if (*token_begin == '*') {
 				finish_token(Token::type_t::MUL);
 			} else if (*token_begin == '/') {
@@ -213,14 +214,14 @@ void Tokenizer::process(char c) {
 			}
 			state = state_t::START;
 		} else {
-			throw_unexpected_char(c);
+			unexpected_char();
 		}
 		break;
 	case state_t::IDENTIFIER:
 		if (is_ident(c)) {
 			continue_token();
 		} else {
-			finish_token(Token::type_t::IDENTIFIER);
+			finish_token(Token::type_t::IDENTIFIER, false);
 			step_back();
 		}
 		break;
@@ -229,10 +230,10 @@ void Tokenizer::process(char c) {
 			continue_token();
 			state = state_t::FLOAT;
 		} else if (is_separator(c) || std::isspace(c) || c == 0) {
-			finish_token(Token::type_t::INTEGER);
+			finish_token(Token::type_t::INTEGER, false);
 			step_back();
 		} else {
-			throw_unexpected_char(c);
+			unexpected_char();
 		}
 		break;
 	case state_t::INTEGER:
@@ -242,39 +243,39 @@ void Tokenizer::process(char c) {
 			continue_token();
 			state = state_t::FLOAT;
 		} else if (is_separator(c) || std::isspace(c) || c == 0) {
-			finish_token(Token::type_t::INTEGER);
+			finish_token(Token::type_t::INTEGER, false);
 			step_back();
 		} else {
-			throw_unexpected_char(c);
+			unexpected_char();
 		}
 		break;
 	case state_t::FLOAT:
 		if (std::isdigit(c)) {
 			continue_token();
 		} else if (is_separator(c) || std::isspace(c) || c == 0) {
-			finish_token(Token::type_t::FLOAT);
+			finish_token(Token::type_t::FLOAT, false);
 			step_back();
 		} else {
-			throw_unexpected_char(c);
+			unexpected_char();
 		}
 		break;
 	case state_t::STRING:
 		if (is_escape) {
 			is_escape = false;
 			if (c == '\n') {
-				throw_unexpected_char(c);
+				unexpected_char();
 			} else {
 				continue_token();
 			}
 		} else {
 			if (c == '"') {
-				finish_token(Token::type_t::STRING);
+				finish_token(Token::type_t::STRING, false);
 				state = state_t::START;
 			} else if (c == '\\') {
 				continue_token();
 				is_escape = true;
 			} else if (c == '\n') {
-				throw_unexpected_char(c);
+				unexpected_char();
 			} else {
 				continue_token();
 			}
@@ -282,10 +283,10 @@ void Tokenizer::process(char c) {
 		break;
 	case state_t::RAW_STRING:
 		if (c == '\'') {
-			finish_token(Token::type_t::RAW_STRING);
+			finish_token(Token::type_t::RAW_STRING, false);
 			state = state_t::START;
 		} else if (c == '\n') {
-			throw_unexpected_char(c);
+			unexpected_char();
 		} else {
 			continue_token();
 		}
@@ -304,13 +305,16 @@ void Tokenizer::step_back() {
 	state = state_t::START;
 }
 
-void Tokenizer::throw_unexpected_char(char c) {
-	throw ParserError{std::string{"Unexpected character: '"} + c + "'",
-			line, position};
+void Tokenizer::unexpected_char() {
+	tokens.emplace_back(Token::type_t::FAIL, token_begin, current-token_begin,
+			token_line, token_position);
+	state = state_t::FINISH;
 }
 
-void Tokenizer::throw_unexpected_eof() {
-	throw ParserError{"Unexpected end of file", line, position};
+void Tokenizer::unexpected_eof() {
+	tokens.emplace_back(Token::type_t::FAIL, token_begin, current-token_begin,
+			token_line, token_position);
+	state = state_t::FINISH;
 }
 
 }

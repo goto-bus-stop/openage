@@ -30,7 +30,7 @@ int to_real_pos(const std::string &str, int pos) {
 	return cnt;
 }
 
-bool tests::tokenizer0(int /*unused*/, char ** /*unused*/) {	
+bool tests::tokenizer0(int /* unused */, char ** /* unused */) {	
 	const char *srcpath = "/tmp/openage.nyanspec";
 	std::ifstream fin{srcpath};
 	if(!fin) {
@@ -49,7 +49,7 @@ bool tests::tokenizer0(int /*unused*/, char ** /*unused*/) {
 	std::string input = buffer.str();
 
 	try {
-		/*
+	//	/*
 		auto start = std::chrono::steady_clock::now();
 		auto spec = parse_spec(input);
 		auto end = std::chrono::steady_clock::now();
@@ -58,8 +58,8 @@ bool tests::tokenizer0(int /*unused*/, char ** /*unused*/) {
 		std::cout << "\n" << spec->to_string() << std::endl;
 		std::cout << "Parsing nyan spec took " << duration.count() << " ms" <<
 				std::endl;
-		*/
-	//	/*
+	//	*/
+		/*
 		Tokenizer tokenizer{input};
 		auto start = std::chrono::steady_clock::now();
 		auto tokens = tokenizer.tokenize();

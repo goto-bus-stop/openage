@@ -2,7 +2,8 @@
 
 #include <algorithm>
 #include <cctype>
-#include <iostream> // TODO REMOVE
+
+#include "util.h"
 
 namespace nyan {
 
@@ -23,8 +24,7 @@ std::unique_ptr<ASTNyanSpec> NyanSpecParser::parse() {
 
 bool NyanSpecParser::is_basic_type() {
 	if (token->type == Token::type_t::IDENTIFIER) {
-		return std::find(std::begin(BASIC_TYPES), std::end(BASIC_TYPES),
-				token->content) != std::end(BASIC_TYPES);
+		return is_basic_type_name(token->content);
 	}
 	return false;
 }
@@ -36,15 +36,15 @@ void NyanSpecParser::parse_spec() {
 		if (has_token(Token::type_t::IDENTIFIER)) {
 			parse_type_decl();
 		} else {
-			throw_expected("type identifier");
+			throw_expected("type declaration");
 		}
 	}
 }
 
 void NyanSpecParser::parse_type_decl() {
 	if (is_basic_type()) {
-		throw ParserError{"Invalid type identifier: '" + token->content + "'",
-				*token};
+		throw ParserError{"Type identifier must not be a basic type: '" +
+				token->content + "'", *token};
 	}
 	// insert new type node into the AST
 	ast->types.emplace_back(std::move(*token));
@@ -64,9 +64,9 @@ void NyanSpecParser::parse_type_decl() {
 
 void NyanSpecParser::parse_type_body() {
 	// parse all type attributes
-	bool got_comma = parse_type_attributes();
+	bool no_comma = parse_type_attributes();
 	// if the last token was no comma, the type declaration is finished now
-	if (got_comma) {
+	if (no_comma) {
 		return;
 	}
 
@@ -85,8 +85,8 @@ void NyanSpecParser::parse_type_body() {
 }
 
 bool NyanSpecParser::parse_type_attributes() {
-	bool got_comma = false;
-	while (!got_comma) {
+	bool no_comma = false;
+	while (!no_comma) {
 		if (!has_token(Token::type_t::IDENTIFIER)) {
 			return false;
 		}
@@ -106,7 +106,7 @@ bool NyanSpecParser::parse_type_attributes() {
 
 		if (attr_type.content == "set") {
 			if (!accept_token(Token::type_t::LPAREN)) {
-				throw_expected("set type");
+				throw_expected("set type");;
 			}
 
 			if (!has_token(Token::type_t::IDENTIFIER)) {
@@ -126,10 +126,10 @@ bool NyanSpecParser::parse_type_attributes() {
 					std::move(attr_type), false);
 		}
 
-		got_comma = !accept_token(Token::type_t::COMMA);
+		no_comma = !accept_token(Token::type_t::COMMA);
 	}
 
-	return got_comma;
+	return no_comma;
 }
 
 void NyanSpecParser::parse_type_deltas(bool must) {
@@ -163,8 +163,12 @@ void NyanSpecParser::throw_expected(char exp) {
 }
 
 void NyanSpecParser::throw_expected(const std::string &exp) {
-	throw ParserError{"Expected <" + exp + ">, got '" + token->content + "'",
+	throw ParserError{"Expected " + exp + ", got '" + token->content + "'",
 			*token};
+}
+
+void NyanSpecParser::throw_got(const std::string &exp) {
+	throw ParserError{exp + ", got '" + token->content + "'", *token};
 }
 
 }
