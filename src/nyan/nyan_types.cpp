@@ -1,6 +1,7 @@
 #include "nyan_types.h"
 
 #include "nyan_spec.h"
+#include "util.h"
 
 namespace nyan {
 
@@ -47,19 +48,16 @@ std::string NyanCustomType::to_string() const {
 
 std::shared_ptr<NyanDatatype> NyanCustomType::get(
 		std::shared_ptr<NyanType> type) {
-	return std::make_shared<NyanCustomType>(type);
-	/*
-	static std::unordered_map<std::weak_ptr<NyanType>,
-			std::shared_ptr<NyanDatatype>> instances;
-	std::weak_ptr<NyanType> weak_type{type};
-	auto inst_iter = instances.find(weak_type);
+	static std::unordered_map<NyanType*,std::shared_ptr<NyanDatatype>>
+			instances;
+	NyanType *type_ptr = type.get();
+	auto inst_iter = instances.find(type_ptr);
 	if (inst_iter == std::end(instances)) {
 		auto instance = std::make_shared<NyanCustomType>(type);
-		instances.insert({weak_type, instance});
+		instances.insert({type_ptr, instance});
 		return instance;
 	}
 	return inst_iter->second;
-	*/
 }
 
 std::string NyanSet::to_string() const {
@@ -68,7 +66,16 @@ std::string NyanSet::to_string() const {
 }
 
 std::shared_ptr<NyanDatatype> NyanSet::get(std::shared_ptr<NyanType> type) {
-	return std::make_shared<NyanSet>(type);
+	static std::unordered_map<NyanType*,std::shared_ptr<NyanDatatype>>
+			instances;
+	NyanType *type_ptr = type.get();
+	auto inst_iter = instances.find(type_ptr);
+	if (inst_iter == std::end(instances)) {
+		auto instance = std::make_shared<NyanSet>(type);
+		instances.insert({type_ptr, instance});
+		return instance;
+	}
+	return inst_iter->second;
 }
 
 NyanCustomType::NyanCustomType(std::shared_ptr<NyanType> type)
