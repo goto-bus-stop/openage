@@ -1,0 +1,17 @@
+AUDIO_RESOURCE(name:string,probability:float)
+SOUND(AUDIO_RESOURCE[1:4,@!+],)
+UNIT(AUDIO_RESOURCE[1],...)
+TECH(UNIT[:],cost_gold:int)
+
+#include "engine/unit.h"
+append_functor_to_changelist(String definitionstuff) {
+	parse_definitistuff
+
+	changelist<Unit>.append(functor_to_set_name_to_string(Unit &u) {
+		u.hp = gschicht;
+	})
+	changelist<Unit>.append(functor_to_set_name_to_string(Unit &u) {
+		u.hp *= gschicht;
+	})
+}
+

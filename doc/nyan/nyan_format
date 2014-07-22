@@ -1,0 +1,238 @@
+nyan format
+-----------
+
+not yet another notation format
+
++UNIT VILLAGER {
+	hp = 1337
+	atlas = "villager_m.png"
+	dyingsound = VILLAGER_DYING_HORRIBLY
+}
+
++UNIT VILLAGER_F: VILLAGER {
+	atlas = "villager_f.png"
+	dyingsound = VILLAGER_F_DYING_HORRIBLY
+}
+
++UNIT FISHER: VILLAGER {
+	atlas = "fisher.png"
+
+	MODULE {
+		name = "villager_transform"
+	}
+}
+
+#e.g. inneram mod:
+@UNIT VILLAGER {
+	hp *= 1.1
+}
+
+SOUND VILLAGER_DYING_HORRIBLY {
+	funnyness = 235
+
+	AUDIO_RESOURCE YAAAAAARGH {
+		probability = 1
+		name = "yaaaaargh.opus"
+	}
+
+	AUDIO_RESOURCE {
+		probability = 4
+		name = "hnnnnnnnnngh.opus"
+	}
+
+	AUDIO_TYPE SOUNDBLABLA
+
+	OTHER_TYPE OTHER_TYPE_OBJECT
+}
+
+@SOUND VILLAGER_DYING_HORRIBLY {
+	!AUDIO_RESOURCE YAAAAAARGH
+
+	AUDIO_RESOURCE MY_AWESOME_BETTER_RESOURCE {
+		probability = 1
+		name = "fu.opus"
+	}
+}
+
+
+AUDIO_RESOURCE SOUNDBLABLA {
+	prob = 1.0
+	name = "etc.opus"
+}
+
+SOUND VILLAGER_F_DYING_HORRIBLY {
+	funnyness = 2351337
+
+	FILE {
+		probability = 1
+		name = "tentacle_splortsch.opus"
+	}
+}
+
+@UNIT VILLEAGER {
+	hp *= 1.2
+
+	+MODULE PATHFINDING {
+		stupid = 1
+	}
+}
+
++MODULE SURPRISE_TENTACLES {
+	atlas = "gschicht.png"
+}
+
++TECH LOOM {
+	@UNIT VILLAGER {
+		hp = 50
+	}
+}
+
+es existiert eine tech (id: LOOM);
+	<base>
+	+UNIT VILLAGER {
+		hp = 50
+	}
+	@UNIT VILLAGER {
+		hp += 10
+	}
+	</base>
+	<modpack0>
+	@UNIT VILLAGER {
+		hp += 10
+	}
+	<modpack1>
+	@UNIT VILLAGER {
+		hp -= 10
+	}
+	</modpack>
+
+@TECH LOOM {
+	-UNIT VILLAGER
+}
+
++TECH FEUDAL {
+	@UNIT VILLAGER {
+		can now build stable;
+	}
+
+	@UNIT TOWNCENTER {
+		can research tech CASTLE
+	}
+}
+
++CULTURE MAYA {
+	@TECH FEUDAL {
+		@UNIT VILLAGER {
+			-can now build stable
+		}
+	}
+}
+
++CULTURE GERMAN {
+	+TECH EDIT_TECHS {
+		@TECH LOOM {
+			cost_gold *= 0.6666
+		}
+	}
+
+	+TECH STUFF {
+		+TECH_ITEM TI0 {
+			type = "add_armor"
+			val = 2.0
+		}
+	}
+
+
+	+UNIT BURG {
+		+CAPABILITY: build deutschritter
+	}
+
+}
+
+#include "unit.h"
+void functor(Unit &u) {
+	u.hp = gschicht;
+}
+
++TECH LOOM {
+	cst_gold = 50
+
+	+UNIT_TECH LOOM_VILLAGER {
+		name = "VILLAGER"
+
+		+TECH_ITEM T0 {
+			type = "add_blunt_armor"
+			value = 20
+		}
+
+	}
+}
+
++TECH LOOM {
+	cost_gold = 50
+
+	@UNIT VILLAGER {
+		hp += 5
+	}
+}
+
+@TECH LOOM {
+	@UNIT VILLAGER {
+		hp -= 5
+		hp += 10
+	}
+}
+
+!TECH LOOM
++TECH LOOM {
+	@UNIT VILLAGER {
+		hp += 10
+	}
+}
+
+class Tech {
+public:
+	int cost_gold;
+	std::vector<AST_STUFFS> deltas;
+	(...)
+
+	Tech(AST_TECH_DEF &def) {
+		this->cost_gold = def.integer_values['cost_gold']
+		this->deltas += def->deltas
+	}
+
+	void update(AST_TECH_DELTA &delta) {
+		if cost_gold in delta:
+			this->cost_gold = def.integer_values['cost_gold']
+		if cost_gold in ...
+	}
+
+	void on_research() {
+		this->do_magic_things(magic);
+	}
+}
+
+@TECH LOOM {
+	@UNIT_TECH LOOM_VILLAGER {
+		@MODULE SURPRISE_TENTACLES {
+			diameter *= 1.1
+		}
+	}
+}
+
+	@UNIT_TECH LOOM_VILLAGER {
+		hp_mult *= 1.1
+
+		@MODULE SURPRISE_TENTACLES {
+			tentacle_diameter *= 1.1
+		}
+	}
+
+	^UNIT VILLAGER {
+		hp *= 100
+	}
+}
+
+CULTURE JAPAN {
+	special_unit = TENTACLE_MONSTER
+}

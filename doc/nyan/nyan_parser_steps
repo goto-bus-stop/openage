@@ -1,0 +1,79 @@
+base.nyan
+
+TYPEA A {
+	keya = 0
+	keyA = 0
+}
+
+TYPEA C: A {
+	keya = 3
+}
+
+TYPEB B {
+	keyb = 1
+}
+
+mod.nyan
+
+@TYPEA A {
+	keya = 2
+	keyA = 2
+}
+
+-->
+
+;base.nyan
+DEF;noinh;TYPEA;A;keya=0;keyA=0
+DEF;inh:A;TYPEA;C;keya=3
+DEF;noinh;TYPEB;B;keyb=1
+;mod.nyan
+MOD;TYPEA;A;keya=2;keyA=2
+
+deltaliste<Unit>: vector<functor<typea>>
+
+<- list of deltas.
+
+-->
+
+TYPEA;A;keya=2;keyA=2;children=[C]
+TYPEA;C;keya=3;keyA=2;parent=[A]
+TYPEB;B;keyb=1
+
+-- openage part --
+
+vorteilauflistung:
+
+mic_e
+
++ cfg-datei deutlich besser schreibbar fuer techs/cultures
+- anwendungszeitpunkt der deltas ist programm-spezifisch, nicht in nyanspec klar definiert
++ live-moddbarkeit partiell gegeben durch applizierung von deltas auf everybody/cultures/units/...
++ in verwendung: keine code duplication bei techs vs initialisierung
+
++TECH LOOM {
+	@UNIT VILLAGER {
+		hp += 20
+	}
+}
+
+freakout
+
++ generic library with clean interface
++ deutlich staerkere kapselung zwischen openage/nyan
++ weniger komplexitaet
+
++TECH LOOM {
+	+UNIT_TECH LOOM_VILLAGER {
+		name = "VILLAGER"
+
+		+TECH_ITEM T0 {
+			type = "add_hp"
+			value = 20
+		}
+	}
+}
+
+idea:
+
++ specify in nyan_spec which deltas should be applied directly
++ work on meta-deltas in libnyan, convert deltas/objects outside of libnyan to openage mapping for mic_e

@@ -1,0 +1,24 @@
+on_tech_erforscht(tech) {
+	for each modification in tech.unit_mods:
+		modification.unit.apply_modification(modification)
+}
+
+unittype::apply_modification(modification) {
+	for each t in this->childtypes:
+		t.apply_modification(modification)
+
+	clone=self.clone()
+	this->childtypes.add(clone)
+
+	for each statchange in modification.statchanges_float:
+		if statchange.name == "hp":
+			statchange.functor(this->hp)
+		if statchange.name == "gschicht":
+			statchange.functor(this->gschicht)
+
+	for each statchange in modification.string:
+		if statchange.name == "name":
+			statchange.functor(this->name)
+
+	search for all units with this.id, set id to clone.id
+}

@@ -1,0 +1,30 @@
+datapack format
+---------------
+
+
+mic_e's idea (great) (actually not great):
+
+female_villagers_with_glasses_and_mating/glasses.nyan
+
+@UNIT VILLAGER_F {
+	atlas = "with_glasses.png"
+}
+
+female_villagers_with_glasses_and_mating/mating.nyan
+
+@UNIT VILLAGER_F {
+	MODULE {
+		name = "mating"
+		partner = TENTACLE_MONSTER
+		spawn = VILLAGER_F
+	}
+}
+
+female_villagers_with_glasses_and_mating/mod.index
+VERSION    13.37
+AUTHOR     PostalDude
+REQUIRED   openage:0.0.1
+CONFLICTS  tentacle_wars, my_little_handgranate
+
+
+female_villagers_with_glasses/with_glasses.png
