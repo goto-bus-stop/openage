@@ -87,6 +87,11 @@ public:
 	std::unordered_map<int, TestSound> available_sounds;
 
 	/**
+	 * background music sounds.
+	 */
+  std::vector<int> background_sounds;
+
+	/**
 	 * map graphic id to gamedata graphic.
 	 */
 	std::unordered_map<int, gamedata::graphic *> graphics;
@@ -121,6 +126,9 @@ public:
 	util::ExternalProfiler external_profiler;
 private:
 	void on_gamedata_loaded(std::vector<gamedata::empiresdat> &gamedata);
+	void next_bgm();
+
+	openage::audio::Sound *current_bgm;
 
 	bool gamedata_loaded;
 	openage::job::Job<std::vector<gamedata::empiresdat>> gamedata_load_job;

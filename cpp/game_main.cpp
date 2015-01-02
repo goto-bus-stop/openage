@@ -112,6 +112,7 @@ GameMain::GameMain(Engine *engine)
 	selected_unit{nullptr},
 	assetmanager{engine->get_data_dir()},
 	gamedata_loaded{false},
+	current_bgm{nullptr},
 	engine{engine} {
 
 	engine->register_draw_action(this);
@@ -290,9 +291,25 @@ void GameMain::on_gamedata_loaded(std::vector<gamedata::empiresdat> &gamedata) {
 		this->available_sounds[sound.id] = TestSound{sound_items};
 	}
 
+	std::vector<gamedata::sound_file> music_files;
+	for (int i = 1; i <= 20 /* amount of `xmusic*.mp3`s in HD Edition */; i++) {
+		gamedata::sound_file f {
+			gamedata::audio_category_t::MUSIC,
+			i,
+			util::format("music/xmusic%d.opus", i),
+			gamedata::audio_format_t::OPUS,
+			gamedata::audio_loader_policy_t::DYNAMIC
+		};
+		background_sounds.push_back(i);
+		music_files.push_back(f);
+	}
+
 	// load the requested sounds.
 	audio::AudioManager &am = engine->get_audio_manager();
 	am.load_resources(asset_dir, sound_files);
+	am.load_resources(asset_dir, music_files);
+
+	this->next_bgm();
 }
 
 GameMain::~GameMain() {
@@ -305,7 +322,6 @@ GameMain::~GameMain() {
 	delete teamcolor_shader::program;
 	delete alphamask_shader::program;
 }
-
 
 bool GameMain::on_input(SDL_Event *e) {
 	Engine &engine = Engine::get();
@@ -495,6 +511,15 @@ bool GameMain::on_input(SDL_Event *e) {
 		case SDLK_LCTRL:
 			this->ctrl_active = false;
 			break;
+		case SDLK_b:
+			// toggle background music
+			if (this->current_bgm) {
+				this->current_bgm->stop();
+			}
+			else if (this->background_sounds.size() > 0) {
+				this->next_bgm();
+			}
+			break;
 		case SDLK_m:
 			this->construct_mode = !this->construct_mode;
 			break;
@@ -603,6 +628,23 @@ bool GameMain::on_drawhud() {
 		txt->draw(bpreview_pos.to_camhud());
 	}
 	return true;
+}
+
+void GameMain::next_bgm() {
+	if (current_bgm != nullptr) {
+		current_bgm->stop();
+	}
+	audio::AudioManager &am = engine->get_audio_manager();
+	int rand = util::random_range(0, background_sounds.size());
+	log::dbg("playing music %d", rand);
+	int cur_music = background_sounds[rand];
+	try {
+		current_bgm = &am.get_sound(audio::category_t::MUSIC, cur_music);
+		current_bgm->play([this] { next_bgm(); });
+	}
+	catch (util::Error &e) {
+		log::dbg("cannot play: %s", e.str());
+	}
 }
 
 Texture *GameMain::find_graphic(int16_t graphic_id) {

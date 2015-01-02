@@ -3,6 +3,7 @@
 #include "sound.h"
 
 #include <tuple>
+#include <functional>
 
 #include "audio_manager.h"
 #include "../log.h"
@@ -52,6 +53,11 @@ void Sound::play() {
 	}
 }
 
+void Sound::play(std::function<void ()> on_finish) {
+	play();
+	sound_impl->on_finish = on_finish;
+}
+
 void Sound::pause() {
 	if (sound_impl->playing) {
 		audio_manager->remove_sound(sound_impl);
@@ -95,7 +101,8 @@ SoundImpl::SoundImpl(std::shared_ptr<Resource> resource, int32_t volume)
 		volume{volume},
 		offset{0},
 		playing{false},
-		looping{false} {
+		looping{false},
+		on_finish{NULL} {
 }
 
 SoundImpl::~SoundImpl() {
@@ -124,6 +131,9 @@ bool SoundImpl::mix_audio(int32_t *stream, int length) {
 				offset = 0;
 			} else {
 				playing = false;
+				if (on_finish != NULL) {
+					on_finish();
+				}
 				return true;
 			}
 		} else if (data == nullptr) {

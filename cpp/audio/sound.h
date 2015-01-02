@@ -4,6 +4,7 @@
 #define OPENAGE_AUDIO_SOUND_H_
 
 #include <memory>
+#include <functional>
 
 #include "category.h"
 #include "resource.h"
@@ -50,6 +51,8 @@ public:
 	 */
 	bool looping;
 
+	std::function<void ()> on_finish;
+
 	SoundImpl(std::shared_ptr<Resource> resource, int32_t volume=128);
 	~SoundImpl();
 
@@ -69,7 +72,6 @@ public:
 	 * @param length the number of values that should mixed
 	 */
 	bool mix_audio(int32_t *stream, int length);
-
 };
 
 /**
@@ -127,6 +129,7 @@ public:
 	 * Resets the sound to it's beginning and starts playing it.
 	 */
 	void play();
+	void play(std::function<void ()>);
 	/**
 	 * Pauses the sound at it's current playing offset.
 	 */
