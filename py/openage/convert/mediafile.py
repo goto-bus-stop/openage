@@ -97,13 +97,13 @@ def media_convert(args):
         for k, v in drsmap.items()
     }
 
-    # gamedata.drs does not exist in HD edition,
-    # but its contents are in gamedata_x1.drs instead,
-    # so we can ignore this file if it doesn't exist
+    # gamedata.drs can be 0 bytes if HD Edition and the Compatibility patch
+    # are used. We need to skip that to prevent the DRS parsing code from
+    # blowing up
     drsfiles = {
         k: DRS(p, drsmap[k])
         for k, p in drsfiles.items()
-        if p
+        if p and os.path.getsize(p) > 0
     }
 
     # this is the ingame color palette file id,
